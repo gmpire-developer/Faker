@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "build": "tailwindcss -i ./static/css/tailwind.css -o ./static/css/style.css --minify",
-    "watch": "tailwindcss -i ./static/css/tailwind.css -o ./static/css/style.css --watch"
+    "watch": "tailwindcss -i ./static/css/tailwind.css -o ./static/css/style.css --watch",
+    "vercel-build": "npm run build && python manage.py collectstatic --noinput"
   },
   "devDependencies": {
     "tailwindcss": "^3.4.13",
