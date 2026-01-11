@@ -1,0 +1,803 @@
+{% extends 'base.html' %} 
+{% load static %} 
+{% block title %}Generate Aadhaar{% endblock %} 
+
+{% block content %}
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .gradient-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .hindi-field {
+    direction: ltr;
+    unicode-bidi: embed;
+  }
+</style>
+
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
+        🎫 Aadhaar Generator
+      </h1>
+      <p class="text-gray-600 text-lg">Fill in the details below to generate your Aadhaar card PDF</p>
+    </div>
+
+    <!-- Success Message Container -->
+    <div id="successMessage" class="hidden mb-6 bg-green-50 border-l-4 border-green-500 p-6 rounded-lg shadow-md">
+      <div class="flex items-center mb-4">
+        <svg class="w-6 h-6 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <h3 class="text-lg font-semibold text-green-800">PDF Generated Successfully!</h3>
+      </div>
+      <div class="flex gap-4">
+        <button onclick="previewPDF()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-105">
+          👁️ Preview PDF
+        </button>
+        <button onclick="downloadPDF()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-105">
+          💾 Download PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
+      <form
+        method="POST"
+        enctype="multipart/form-data"
+        action="{% url 'generate_page' %}"
+        id="aadhaarForm"
+      >
+        {% csrf_token %}
+
+        <!-- Photo Upload Section -->
+        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 mb-6 border border-purple-200">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <span class="text-3xl mr-3">📸</span> Photo Upload
+          </h3>
+          <div class="space-y-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Upload Photo <span class="text-red-500">*</span>
+            </label>
+            <div
+              class="border-2 border-dashed border-indigo-300 rounded-lg p-8 text-center cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition duration-200"
+              onclick="document.getElementById('photo').click()"
+            >
+              <div class="text-5xl mb-3">📷</div>
+              <p class="font-semibold text-gray-700 mb-1">Click to upload photo</p>
+              <small class="text-gray-500">Accepted formats: JPG, PNG (Max 5MB)</small>
+            </div>
+            <input
+              type="file"
+              class="hidden"
+              id="photo"
+              name="photo"
+              accept="image/*"
+              required
+            />
+            <div id="photoFileName" class="text-center text-green-600 font-medium"></div>
+          </div>
+        </div>
+
+        <!-- Personal Information Section -->
+        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-6 mb-6 border border-blue-200">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <span class="text-3xl mr-3">👤</span> Personal Information
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="name_english" class="block text-sm font-medium text-gray-700 mb-2">
+                Name (English) <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                id="name_english"
+                name="name_english"
+                placeholder="e.g., Pargat Singh"
+                required
+              />
+              
+            </div>
+
+            <div>
+              <label for="name_hindi" class="block text-sm font-medium text-gray-700 mb-2">
+                Name (Hindi) <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent hindi-field"
+                id="name_hindi"
+                name="name_hindi"
+                placeholder="प्रगट सिंह"
+                required
+                onfocus="showEnglish(this)"
+                oninput="debouncedTransliterate(this)"
+                onblur="transliterateToHindi(this)"
+              />
+              <small class="text-gray-600 text-xs mt-1 block">Start typing in english...</small>
+            </div>
+
+            <div>
+              <label for="dob" class="block text-sm font-medium text-gray-700 mb-2">
+                Date of Birth <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent datepicker"
+                id="dob"
+                name="dob"
+                placeholder="e.g., 01/01/2000"
+                required
+                readonly
+              />
+            </div>
+
+            <div>
+              <label for="gender" class="block text-sm font-medium text-gray-700 mb-2">
+                Gender <span class="text-red-500">*</span>
+              </label>
+              <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" id="gender" name="gender" required>
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="guardian_english" class="block text-sm font-medium text-gray-700 mb-2">
+                Guardian Name (English) <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                id="guardian_english"
+                name="guardian_english"
+                placeholder="e.g., Sukhdeep Singh"
+                required
+              />
+              
+            </div>
+
+            <div>
+              <label for="guardian_hindi" class="block text-sm font-medium text-gray-700 mb-2">
+                Guardian Name (Hindi) <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent hindi-field"
+                id="guardian_hindi"
+                name="guardian_hindi"
+                placeholder="सुखदीप सिंह"
+                required
+                onfocus="showEnglish(this)"
+                oninput="debouncedTransliterate(this)"
+                onblur="transliterateToHindi(this)"
+              />
+              <small class="text-gray-600 text-xs mt-1 block">Start typing in english...</small>
+            </div>
+
+            <div>
+              <label for="relation" class="block text-sm font-medium text-gray-700 mb-2">
+                Relation <span class="text-red-500">*</span>
+              </label>
+              <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" id="relation" name="relation" required>
+                <option value="">Select Relation</option>
+                <option value="C">Child</option>
+                <option value="W">Wife</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aadhaar & VID Details Section -->
+        <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 mb-6 border border-green-200">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <span class="text-3xl mr-3">🔢</span> Aadhaar & VID Details
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="aadhaar_number" class="block text-sm font-medium text-gray-700 mb-2">
+                Aadhaar Number <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                id="aadhaar_number"
+                name="aadhaar_number"
+                placeholder="e.g., 4367 7667 5676"
+                pattern="\d{4} \d{4} \d{4}"
+                maxlength="14"
+                required
+              />
+              <small class="text-gray-600 text-xs mt-1 block">12 digits in format: XXXX XXXX XXXX</small>
+            </div>
+
+            <div>
+              <label for="vid_number" class="block text-sm font-medium text-gray-700 mb-2">
+                VID Number <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                id="vid_number"
+                name="vid_number"
+                placeholder="e.g., 7746 7469 2816 3571"
+                pattern="\d{4} \d{4} \d{4} \d{4}"
+                maxlength="19"
+                required
+              />
+              <small class="text-gray-600 text-xs mt-1 block">16 digits in format: XXXX XXXX XXXX XXXX</small>
+            </div>
+
+            <div>
+              <label for="issue_date" class="block text-sm font-medium text-gray-700 mb-2">
+                Aadhaar Issue Date <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent datepicker"
+                id="issue_date"
+                name="issue_date"
+                placeholder="e.g., 01/01/2010"
+                required
+                readonly
+              />
+            </div>
+
+            <div>
+              <label for="details_date" class="block text-sm font-medium text-gray-700 mb-2">
+                Details As On Date <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent datepicker"
+                id="details_date"
+                name="details_date"
+                placeholder="e.g., 01/01/2025"
+                required
+                readonly
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Location Information Section -->
+        <div class="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-6 mb-6 border border-orange-200">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <span class="text-3xl mr-3">🏠</span> Location Information
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="village_town_english" class="block text-sm font-medium text-gray-700 mb-2">
+                Village/Town (English) <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                id="village_town_english"
+                name="village_town_english"
+                placeholder="e.g., Muklawa"
+                required
+              />
+              
+            </div>
+
+            <div>
+              <label for="village_town_hindi" class="block text-sm font-medium text-gray-700 mb-2">
+                Village/Town (Hindi) <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent hindi-field"
+                id="village_town_hindi"
+                name="village_town_hindi"
+                placeholder="मुकलावा"
+                required
+                onfocus="showEnglish(this)"
+                oninput="debouncedTransliterate(this)"
+                onblur="transliterateToHindi(this)"
+              />
+              <small class="text-gray-600 text-xs mt-1 block">Start typing in english...</small>
+            </div>
+
+            <div>
+              <label for="po_english" class="block text-sm font-medium text-gray-700 mb-2">
+                Post Office (English) <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                id="po_english"
+                name="po_english"
+                placeholder="e.g., Raisinghnagar"
+                required
+              />
+              
+            </div>
+
+            <div>
+              <label for="po_hindi" class="block text-sm font-medium text-gray-700 mb-2">
+                Post Office (Hindi) <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent hindi-field"
+                id="po_hindi"
+                name="po_hindi"
+                placeholder="रायसिंहनगर"
+                required
+                onfocus="showEnglish(this)"
+                oninput="debouncedTransliterate(this)"
+                onblur="transliterateToHindi(this)"
+              />
+              <small class="text-gray-600 text-xs mt-1 block">Start typing in english...</small>
+            </div>
+
+            <div>
+              <label for="dist_english" class="block text-sm font-medium text-gray-700 mb-2">
+                District (English) <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                id="dist_english"
+                name="dist_english"
+                placeholder="e.g., Sri Ganganagar"
+                required
+              />              
+            </div>
+
+            <div>
+              <label for="dist_hindi" class="block text-sm font-medium text-gray-700 mb-2">
+                District (Hindi) <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent hindi-field"
+                id="dist_hindi"
+                name="dist_hindi"
+                placeholder="श्री गंगानगर"
+                required
+                onfocus="showEnglish(this)"
+                oninput="debouncedTransliterate(this)"
+                onblur="transliterateToHindi(this)"
+              />
+              <small class="text-gray-600 text-xs mt-1 block">Start typing in english...</small>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            <div>
+              <label for="state" class="block text-sm font-medium text-gray-700 mb-2">
+                State <span class="text-red-500">*</span>
+              </label>
+              <select
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                id="state"
+                name="state"
+                required
+                onchange="updateStateHindi()"
+              >
+                <option value="">Select State</option>
+                <option value="Rajasthan">Rajasthan</option>
+                <option value="Gujarat">Gujarat</option>
+                <option value="Punjab">Punjab</option>
+                <option value="Haryana">Haryana</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Karnataka">Karnataka</option>
+                <option value="Tamil Nadu">Tamil Nadu</option>
+                <option value="Telangana">Telangana</option>
+                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                <option value="West Bengal">West Bengal</option>
+                <option value="Odisha">Odisha</option>
+                <option value="Jharkhand">Jharkhand</option>
+                <option value="Bihar">Bihar</option>
+                <option value="Chhattisgarh">Chhattisgarh</option>
+                <option value="Assam">Assam</option>
+                <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                <option value="Manipur">Manipur</option>
+                <option value="Meghalaya">Meghalaya</option>
+                <option value="Mizoram">Mizoram</option>
+                <option value="Nagaland">Nagaland</option>
+                <option value="Sikkim">Sikkim</option>
+                <option value="Tripura">Tripura</option>
+                <option value="Goa">Goa</option>
+                <option value="Kerala">Kerala</option>
+                <option value="Himachal Pradesh">Himachal Pradesh</option>
+                <option value="Uttarakhand">Uttarakhand</option>
+                <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                <option value="Ladakh">Ladakh</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="state_hindi" class="block text-sm font-medium text-gray-700 mb-2">
+                State (Hindi) <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
+                id="state_hindi"
+                name="state_hindi"
+                readonly
+              />
+            </div>
+
+            <div>
+              <label for="pincode" class="block text-sm font-medium text-gray-700 mb-2">
+                PIN Code <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                id="pincode"
+                name="pincode"
+                placeholder="e.g., 335039"
+                pattern="\d{6}"
+                maxlength="6"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="mt-8 flex justify-center">
+          <button type="submit" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-12 rounded-xl shadow-2xl transform transition hover:scale-105 hover:shadow-3xl text-lg">
+            ✨ Generate Aadhaar PDF
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Debounce timer object to store timers for each field
+  let debounceTimers = {};
+
+  // Map each Hindi field to its paired English field for fallback
+  const hindiToEnglishFieldMap = {
+    name_hindi: 'name_english',
+    guardian_hindi: 'guardian_english',
+    village_town_hindi: 'village_town_english',
+    po_hindi: 'po_english',
+    dist_hindi: 'dist_english'
+  };
+
+  // Show English text when focusing on Hindi field for editing
+  function showEnglish(inputElement) {
+    const fieldId = inputElement.id;
+    
+    // Cancel any pending transliteration for this field
+    if (debounceTimers[fieldId]) {
+      clearTimeout(debounceTimers[fieldId]);
+      delete debounceTimers[fieldId];
+    }
+    
+    // Prefer stored English; fall back to paired English field if available
+    let englishText = (inputElement.dataset.english || '').trim();
+    if (!englishText && hindiToEnglishFieldMap[fieldId]) {
+      const englishField = document.getElementById(hindiToEnglishFieldMap[fieldId]);
+      if (englishField && englishField.value.trim()) {
+        englishText = englishField.value.trim();
+        inputElement.dataset.english = englishText;
+      }
+    }
+
+    if (englishText) {
+      inputElement.value = englishText;
+      // Place cursor at end for quick editing
+      inputElement.setSelectionRange(englishText.length, englishText.length);
+    } else {
+      inputElement.value = '';
+    }
+  }
+
+  // Debounced transliteration - waits 1000ms after user stops typing
+  function debouncedTransliterate(inputElement) {
+    const fieldId = inputElement.id;
+    
+    // Update the data-english attribute with current text as user types
+    // This ensures we always know what English text was entered
+    inputElement.dataset.english = inputElement.value;
+    
+    // Clear existing timer for this field
+    if (debounceTimers[fieldId]) {
+      clearTimeout(debounceTimers[fieldId]);
+    }
+    
+    // Set new timer - transliterate after 1000ms of no typing
+    debounceTimers[fieldId] = setTimeout(() => {
+      transliterateToHindi(inputElement);
+    }, 1000);
+  }
+
+  // Transliterate function
+  async function transliterateToHindi(inputElement) {
+    // Use stored English if present; otherwise use current value
+    const englishText = (inputElement.dataset.english || inputElement.value).trim();
+    const fieldId = inputElement.id;
+    
+    if (!englishText.trim()) {
+      inputElement.dataset.english = '';
+      return;
+    }
+
+    // Store the English text entered by user
+    inputElement.dataset.english = englishText;
+
+    try {
+      // Use Google Input Tools API via fetch
+      const response = await fetch('https://inputtools.google.com/request?text=' + encodeURIComponent(englishText) + '&itc=hi-t-i0-und&num=1&cp=0&cs=1&ie=utf-8&oe=utf-8&app=demopage');
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data[1] && data[1][0] && data[1][0][1] && data[1][0][1][0]) {
+          inputElement.value = data[1][0][1][0];
+          return;
+        }
+      }
+    } catch (error) {
+      console.log('Google API not available, using offline transliteration');
+    }
+    
+    // Fallback: Use offline transliteration
+    inputElement.value = basicTransliterate(englishText);
+  }
+
+  // Basic transliteration mapping (fallback when API is not available)
+  function basicTransliterate(text) {
+    const transliterationMap = {
+      // Vowels
+      'a': 'अ', 'aa': 'आ', 'A': 'आ',
+      'i': 'इ', 'ii': 'ई', 'I': 'ई',
+      'u': 'उ', 'uu': 'ऊ', 'U': 'ऊ',
+      'e': 'ए', 'ai': 'ऐ', 'o': 'ओ', 'au': 'औ',
+      
+      // Consonants with combinations
+      'ksh': 'क्ष', 'ks': 'क्ष',
+      'kh': 'ख', 'gh': 'घ', 'ng': 'ङ',
+      'chh': 'छ', 'ch': 'च', 'jh': 'झ', 'ny': 'ञ',
+      'th': 'थ', 'dh': 'ध', 'ph': 'फ', 'bh': 'भ',
+      'sh': 'श', 'Sh': 'ष',
+      
+      // Single consonants with vowel combinations
+      'ka': 'क', 'ki': 'कि', 'ku': 'कु', 'ke': 'के', 'ko': 'को',
+      'kha': 'ख', 'khi': 'खि', 'khu': 'खु', 'khe': 'खे', 'kho': 'खो',
+      'ga': 'ग', 'gi': 'गि', 'gu': 'गु', 'ge': 'गे', 'go': 'गो',
+      'gha': 'घ', 'ghi': 'घि', 'ghu': 'घु', 'ghe': 'घे', 'gho': 'घो',
+      'nga': 'ङ', 'ngi': 'ङि', 'ngu': 'ङु', 'nge': 'ङे', 'ngo': 'ङो',
+      
+      'cha': 'च', 'chi': 'चि', 'chu': 'चु', 'che': 'चे', 'cho': 'चो',
+      'chha': 'छ', 'chhi': 'छि', 'chhu': 'छु', 'chhe': 'छे', 'chho': 'छो',
+      'ja': 'ज', 'ji': 'जि', 'ju': 'जु', 'je': 'जे', 'jo': 'जो',
+      'jha': 'झ', 'jhi': 'झि', 'jhu': 'झु', 'jhe': 'झे', 'jho': 'झो',
+      'nya': 'ञ', 'nyi': 'ञि', 'nyu': 'ञु', 'nye': 'ञे', 'nyo': 'ञो',
+      
+      'ta': 'त', 'ti': 'ति', 'tu': 'तु', 'te': 'ते', 'to': 'तो',
+      'tha': 'थ', 'thi': 'थि', 'thu': 'थु', 'the': 'थे', 'tho': 'थो',
+      'da': 'द', 'di': 'दि', 'du': 'दु', 'de': 'दे', 'do': 'दो',
+      'dha': 'ध', 'dhi': 'धि', 'dhu': 'धु', 'dhe': 'धे', 'dho': 'धो',
+      'na': 'न', 'ni': 'नि', 'nu': 'नु', 'ne': 'ने', 'no': 'नो',
+      
+      'pa': 'प', 'pi': 'पि', 'pu': 'पु', 'pe': 'पे', 'po': 'पो',
+      'pha': 'फ', 'phi': 'फि', 'phu': 'फु', 'phe': 'फे', 'pho': 'फो',
+      'ba': 'ब', 'bi': 'बि', 'bu': 'बु', 'be': 'बे', 'bo': 'बो',
+      'bha': 'भ', 'bhi': 'भि', 'bhu': 'भु', 'bhe': 'भे', 'bho': 'भो',
+      'ma': 'म', 'mi': 'मि', 'mu': 'मु', 'me': 'मे', 'mo': 'मो',
+      
+      'ya': 'य', 'yi': 'यि', 'yu': 'यु', 'ye': 'ये', 'yo': 'यो',
+      'ra': 'र', 'ri': 'रि', 'ru': 'रु', 're': 'रे', 'ro': 'रो',
+      'la': 'ल', 'li': 'लि', 'lu': 'लु', 'le': 'ले', 'lo': 'लो',
+      'va': 'व', 'vi': 'वि', 'vu': 'वु', 've': 'वे', 'vo': 'वो',
+      'wa': 'व', 'wi': 'वि', 'wu': 'वु', 'we': 'वे', 'wo': 'वो',
+      
+      'sa': 'स', 'si': 'सि', 'su': 'सु', 'se': 'से', 'so': 'सो',
+      'sha': 'श', 'shi': 'शि', 'shu': 'शु', 'she': 'शे', 'sho': 'शो',
+      'ha': 'ह', 'hi': 'हि', 'hu': 'हु', 'he': 'हे', 'ho': 'हो',
+      
+      // Standalone consonants
+      'k': 'क', 'g': 'ग', 'j': 'ज', 't': 'त', 'd': 'द',
+      'n': 'न', 'p': 'प', 'b': 'ब', 'm': 'म', 'y': 'य',
+      'r': 'र', 'l': 'ल', 'v': 'व', 'w': 'व', 's': 'स', 'h': 'ह'
+    };
+
+    let result = '';
+    let i = 0;
+    const textLower = text.toLowerCase();
+    
+    while (i < textLower.length) {
+      let found = false;
+      
+      // Try longer combinations first (up to 4 characters for 'chha', etc.)
+      for (let len = 4; len >= 1 && !found; len--) {
+        if (i + len <= textLower.length) {
+          const substr = textLower.substring(i, i + len);
+          if (transliterationMap[substr]) {
+            result += transliterationMap[substr];
+            i += len;
+            found = true;
+            break;
+          }
+        }
+      }
+      
+      // If no match found, check if it's a number or special character
+      if (!found) {
+        if (textLower[i] >= '0' && textLower[i] <= '9') {
+          result += textLower[i]; // Keep numbers as-is
+        } else if (textLower[i] === ' ' || textLower[i] === ',' || textLower[i] === '.') {
+          result += text[i]; // Keep spaces and punctuation
+        } else {
+          result += text[i]; // Keep unknown characters as-is
+        }
+        i += 1;
+      }
+    }
+    
+    return result;
+  }
+
+  // State to Hindi mapping
+  const stateHindiMap = {
+    Rajasthan: "राजस्थान",
+    Gujarat: "गुजरात",
+    Punjab: "पंजाब",
+    Haryana: "हरियाणा",
+    Delhi: "दिल्ली",
+    "Uttar Pradesh": "उत्तर प्रदेश",
+    "Madhya Pradesh": "मध्य प्रदेश",
+    Maharashtra: "महाराष्ट्र",
+    Karnataka: "कर्नाटक",
+    "Tamil Nadu": "तमिलनाडु",
+    Telangana: "तेलंगाना",
+    "Andhra Pradesh": "आंध्र प्रदेश",
+    "West Bengal": "पश्चिम बंगाल",
+    Odisha: "ओडिशा",
+    Jharkhand: "झारखंड",
+    Bihar: "बिहार",
+    Chhattisgarh: "छत्तीसगढ़",
+    Assam: "असम",
+    "Arunachal Pradesh": "अरुणाचल प्रदेश",
+    Manipur: "मणिपुर",
+    Meghalaya: "मेघालय",
+    Mizoram: "मिजोरम",
+    Nagaland: "नागालैंड",
+    Sikkim: "सिक्किम",
+    Tripura: "त्रिपुरा",
+    Goa: "गोवा",
+    Kerala: "केरल",
+    "Himachal Pradesh": "हिमाचल प्रदेश",
+    Uttarakhand: "उत्तराखंड",
+    "Jammu and Kashmir": "जम्मू और कश्मीर",
+    Ladakh: "लद्दाख",
+  };
+
+  function updateStateHindi() {
+    const stateSelect = document.getElementById("state");
+    const stateHindiInput = document.getElementById("state_hindi");
+    const selectedState = stateSelect.value;
+    stateHindiInput.value = stateHindiMap[selectedState] || "";
+  }
+
+  // Initialize datepickers
+  flatpickr(".datepicker", {
+    dateFormat: "d/m/Y",
+    allowInput: true,
+    maxDate: "today",
+  });
+
+  // Photo upload filename display
+  document.getElementById("photo").addEventListener("change", function (e) {
+    const fileName = e.target.files[0]?.name;
+    const fileNameDiv = document.getElementById("photoFileName");
+    if (fileName) {
+      fileNameDiv.textContent = "✓ Selected: " + fileName;
+    }
+  });
+
+  // Auto-format Aadhaar number
+  document
+    .getElementById("aadhaar_number")
+    .addEventListener("input", function (e) {
+      let value = e.target.value.replace(/\s/g, "");
+      let formatted = value.match(/.{1,4}/g)?.join(" ") || value;
+      e.target.value = formatted.substring(0, 14);
+    });
+
+  // Auto-format VID number
+  document.getElementById("vid_number").addEventListener("input", function (e) {
+    let value = e.target.value.replace(/\s/g, "");
+    let formatted = value.match(/.{1,4}/g)?.join(" ") || value;
+    e.target.value = formatted.substring(0, 19);
+  });
+
+  // PIN code auto-format - only numbers
+  document.getElementById("pincode").addEventListener("input", function (e) {
+    e.target.value = e.target.value.replace(/\D/g, "").substring(0, 6);
+  });
+
+  // Handle form submission with preview and download buttons
+  let generatedPdfUrl = null;
+  
+  function previewPDF() {
+    if (generatedPdfUrl) {
+      window.open(generatedPdfUrl, '_blank');
+    }
+  }
+  
+  function downloadPDF() {
+    if (generatedPdfUrl) {
+      const a = document.createElement('a');
+      a.href = generatedPdfUrl;
+      a.download = 'aadhaar.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  }
+  
+  document.getElementById('aadhaarForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+    const successMessage = document.getElementById('successMessage');
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<svg class="animate-spin h-5 w-5 inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Generating...';
+    
+    // Hide success message if visible
+    successMessage.classList.add('hidden');
+    document.getElementById('successMessage').classList.add('hidden');
+    
+    try {
+      const response = await fetch(this.action, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        generatedPdfUrl = URL.createObjectURL(blob);
+        
+        // Show success message
+        successMessage.classList.remove('hidden');
+        
+        // Scroll to success message
+        successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        alert('Error generating PDF. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error generating PDF. Please check your internet connection.');
+    } finally {
+      // Restore button
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
+    }
+  });
+</script>
+{% endblock %}

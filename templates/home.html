@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Aadhaar Faker{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="mb-16">
+  <div class="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl shadow-2xl overflow-hidden">
+    <div class="grid md:grid-cols-2 gap-12 items-center p-8 md:p-16">
+      <div>
+        <h1 class="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+          Generate Fake Aadhaar PDFs
+        </h1>
+        <p class="text-xl text-indigo-100 mb-8 leading-relaxed">
+          Create realistic fake Aadhaar card data for testing and development purposes. Perfect for QA teams and developers.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="{% url 'generate_page' %}" class="inline-block bg-white text-indigo-600 hover:bg-indigo-50 font-bold py-4 px-8 rounded-lg shadow-lg transform transition hover:scale-105">
+            ✨ Generate Now
+          </a>
+          <a href="#features" class="inline-block border-2 border-white text-white hover:bg-white hover:text-indigo-600 font-bold py-4 px-8 rounded-lg transform transition hover:scale-105">
+            Learn More
+          </a>
+        </div>
+      </div>
+      <div class="hidden md:block text-center">
+        <div class="bg-white bg-opacity-10 backdrop-blur rounded-xl p-8 border border-white border-opacity-20">
+          <div class="text-6xl mb-4">📄</div>
+          <p class="text-white text-lg font-semibold">Bilingual PDF Generation</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="mb-16">
+  <div class="text-center mb-12">
+    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+      Powerful Features
+    </h2>
+    <p class="text-xl text-gray-600">Everything you need for comprehensive Aadhaar testing</p>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-8">
+    <!-- Feature 1 -->
+    <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition p-8 border-t-4 border-indigo-500">
+      <div class="text-5xl mb-4">🔐</div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-3">Valid Format</h3>
+      <p class="text-gray-600 leading-relaxed">
+        All generated data follows the official Aadhaar format with proper validation and structure.
+      </p>
+    </div>
+
+    <!-- Feature 2 -->
+    <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition p-8 border-t-4 border-purple-500">
+      <div class="text-5xl mb-4">🌐</div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-3">Bilingual Support</h3>
+      <p class="text-gray-600 leading-relaxed">
+        Generate PDFs with both English and Hindi text. Real-time transliteration as you type.
+      </p>
+    </div>
+
+    <!-- Feature 3 -->
+    <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition p-8 border-t-4 border-pink-500">
+      <div class="text-5xl mb-4">⚡</div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-3">Fast & Easy</h3>
+      <p class="text-gray-600 leading-relaxed">
+        Simple form with auto-formatting, date pickers, and instant PDF preview in a new window.
+      </p>
+    </div>
+
+    <!-- Feature 4 -->
+    <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition p-8 border-t-4 border-indigo-500">
+      <div class="text-5xl mb-4">📱</div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-3">Mobile Responsive</h3>
+      <p class="text-gray-600 leading-relaxed">
+        Works perfectly on desktop, tablet, and mobile devices for seamless testing anywhere.
+      </p>
+    </div>
+
+    <!-- Feature 5 -->
+    <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition p-8 border-t-4 border-purple-500">
+      <div class="text-5xl mb-4">👤</div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-3">Photo Upload</h3>
+      <p class="text-gray-600 leading-relaxed">
+        Include custom photos in your generated Aadhaar cards for realistic testing scenarios.
+      </p>
+    </div>
+
+    <!-- Feature 6 -->
+    <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition p-8 border-t-4 border-pink-500">
+      <div class="text-5xl mb-4">📥</div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-3">Download PDFs</h3>
+      <p class="text-gray-600 leading-relaxed">
+        Preview in browser or download PDFs directly for use in your test automation suites.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="mb-16 bg-gray-50 rounded-2xl p-12">
+  <div class="text-center mb-12">
+    <h2 class="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+    <p class="text-xl text-gray-600">Three simple steps to generate your test Aadhaar</p>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-8">
+    <!-- Step 1 -->
+    <div class="text-center">
+      <div class="bg-indigo-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto text-3xl font-bold mb-6">
+        1
+      </div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-3">Fill Details</h3>
+      <p class="text-gray-600">
+        Enter personal information, photo, and location details. Use placeholders or sample data.
+      </p>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="text-center">
+      <div class="bg-purple-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto text-3xl font-bold mb-6">
+        2
+      </div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-3">Generate PDF</h3>
+      <p class="text-gray-600">
+        Click generate button. The system creates a realistic Aadhaar PDF with your data.
+      </p>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="text-center">
+      <div class="bg-pink-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto text-3xl font-bold mb-6">
+        3
+      </div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-3">Download & Test</h3>
+      <p class="text-gray-600">
+        Preview the PDF or download it for use in your testing workflows and QA processes.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-2xl p-12 text-center">
+  <h2 class="text-4xl font-bold text-white mb-4">Ready to Get Started?</h2>
+  <p class="text-xl text-indigo-100 mb-8">Generate your first test Aadhaar PDF in seconds</p>
+  <a href="{% url 'generate_page' %}" class="inline-block bg-white text-indigo-600 hover:bg-indigo-50 font-bold py-4 px-12 rounded-lg shadow-lg transform transition hover:scale-105">
+    Start Generating Now
+  </a>
+</section>
+{% endblock %}

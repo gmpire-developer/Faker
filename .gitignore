@@ -1,0 +1,110 @@
+# Python
+*.py[cod]
+*$py.class
+*.so
+.Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Virtual Environments
+env/
+venv/
+ENV/
+.venv
+.env
+.env.local
+.env.*.local
+virtualenv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/static_root/
+/media/
+*.pot
+local_settings.py
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn.lock
+package-lock.json
+.pnpm-debug.log
+
+# Build outputs
+/static/css/style.css
+*.min.css
+*.min.js
+dist/
+build/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Vercel
+.vercel
+.vercel.json.backup
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# Secrets
+*.pem
+*.key
+.secret
+secrets.json
+
+# Testing
+.tox/
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+
+# Misc
+*.sage.py
+celerybeat-schedule
+celerybeat.pid
+instance/
+.webassets-cache
+.scrapy
+docs/_build/
+target/
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# User-specific
+todos.txt
+notes.txt
+scratch/

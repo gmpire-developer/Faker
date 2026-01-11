@@ -1,0 +1,14 @@
+{
+  "name": "faker-django",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tailwindcss -i ./static/css/tailwind.css -o ./static/css/style.css --minify",
+    "watch": "tailwindcss -i ./static/css/tailwind.css -o ./static/css/style.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.13",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.31"
+  }
+}
