@@ -7,19 +7,18 @@ import os
 import sys
 from pathlib import Path
 
-# Add the project root to sys.path
-root = Path(__file__).resolve().parent.parent
-if str(root) not in sys.path:
-    sys.path.insert(0, str(root))
+# Ensure project root is on sys.path
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
-# Set Django settings module
+# Point to settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-# Import Django WSGI application after path is set
 from django.core.wsgi import get_wsgi_application
 
-# Initialize Django application
+# WSGI application
 application = get_wsgi_application()
 
-# Alias for Vercel
+# Vercel entrypoint
 app = application
