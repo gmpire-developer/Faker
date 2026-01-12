@@ -2,11 +2,6 @@
   "version": 2,
   "buildCommand": "pip install -r requirements.txt && npm install && npm run build && python manage.py collectstatic --noinput",
   "devCommand": "python manage.py runserver",
-  "functions": {
-    "api/wsgi.py": {
-      "runtime": "python3.11"
-    }
-  },
   "routes": [
     {
       "src": "/static/(.*)",
