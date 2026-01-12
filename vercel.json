@@ -7,7 +7,7 @@
   },
   "functions": {
     "api/wsgi.py": {
-      "runtime": "python3.9"
+      "runtime": "@vercel/python@3.12"
     }
   },
   "routes": [
