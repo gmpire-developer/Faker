@@ -1,11 +1,13 @@
 #!/bin/bash
 
-# Build the project
-echo "Building the project..."
-python3.11 -m pip install -r requirements.txt
+# Build script for Vercel deployment
 
-echo "Make Migration..."
-python3.11 manage.py makemigrations --noinput
-python3.11 manage.py migrate --noinput
-echo "Collect Static..."
-python3.11 manage.py collectstatic --noinput --clear
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Install Node dependencies and build Tailwind CSS
+npm install
+npm run build
+
+# Collect static files
+python manage.py collectstatic --noinput --clear
