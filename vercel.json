@@ -1,28 +1,8 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/wsgi.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "vercel_build.py",
-      "use": "@vercel/python"
-    }
-  ],
+  "buildCommand": "pip install -r requirements.txt && npm install && npm run build && python manage.py collectstatic --noinput --clear",
+  "outputDirectory": "staticfiles",
   "routes": [
-    {
-      "src": "/static/(.*)",
-      "dest": "/staticfiles/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "api/wsgi.py"
-    }
-  ],
-  "env": {
-    "SECRET_KEY": "17qm$dgk%n44%6z!xyxpu=db0j**7&c#mkz(j_(d2!!5vt*$6q",
-    "DEBUG": "False",
-    "ALLOWED_HOSTS": "faker.vercel.app,localhost,127.0.0.1"
-  }
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/api/wsgi.py" }
+  ]
 }
