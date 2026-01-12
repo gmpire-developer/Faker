@@ -108,8 +108,9 @@ def generate(request):
     if liberation_sans_bold_path.exists():
         pdf.add_font('LiberationSansBold', style='', fname=str(liberation_sans_bold_path))
 
-    # Enable text shaping for proper Devanagari ligatures
-    pdf.set_text_shaping(True)
+    # Enable text shaping for proper Devanagari ligatures when available
+    if hasattr(pdf, 'set_text_shaping'):
+        pdf.set_text_shaping(True)
 
     # Helper to convert inches to mm
     def in_to_mm(inches):
